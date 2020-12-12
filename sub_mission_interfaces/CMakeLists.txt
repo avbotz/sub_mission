@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(sub_mission)
+project(sub_mission_interfaces)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -17,8 +17,18 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(sub_control_interfaces REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+# uncomment the following section in order to fill in
+# further dependencies manually.
+# find_package(<dependency> REQUIRED)
+
+# Generate service files
+rosidl_generate_interfaces(${PROJECT_NAME}
+    "srv/prelim/CurrentTargetState.srv"
+    "srv/prelim/GetStatesLen.srv"
+    "srv/prelim/SetCurrentTargetState.srv"
+    "srv/prelim/QueueState.srv"
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
