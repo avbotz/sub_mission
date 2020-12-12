@@ -56,6 +56,10 @@ float angle_difference(float a1, float a2)
  */
 void move_sync(std::shared_ptr<rclcpp::Node> node, State target_state)
 {
+    std::cout << "target " << target_state.x << " " << target_state.y  << " " << target_state.z << std::endl;
+    control_client::write_state(target_state);
+    std::this_thread::sleep_for(500ms);
+
     while (rclcpp::ok())
     {
         // Get current sub state

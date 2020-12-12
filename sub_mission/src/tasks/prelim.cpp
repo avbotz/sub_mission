@@ -20,8 +20,14 @@ int main(int argc, char** argv)
     std::cout << "init control clients" << std::endl;
     control_client::init_clients(node);
 
-    std::cout << "initted" << std::endl;
-    control_client::write("p 0.8\n");
+    // Wait a second for sub to come up
+    std::this_thread::sleep_for(2s);
+
+    std::cout << "set power to 0.2" << std::endl;
+    control_client::write("p 0.2\n");
+
+    // Wait a second for sub to come up
+    std::this_thread::sleep_for(3s);
 
     // Wait for kill switch
     std::cout << "wait for kill" << std::endl;
