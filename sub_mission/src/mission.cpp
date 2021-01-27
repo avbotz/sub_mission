@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     // Init node
     std::cout << "init node" << std::endl;
     rclcpp::init(argc, argv);
-    auto node = rclcpp::Node::make_shared("prelim_node");
+    auto node = rclcpp::Node::make_shared("mission_node");
 
     // Init control client
     std::cout << "init control clients" << std::endl;

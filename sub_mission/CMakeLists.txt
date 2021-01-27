@@ -21,6 +21,8 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(sub_control_interfaces REQUIRED)
+find_package(sub_vision REQUIRED)
+find_package(sub_vision_interfaces REQUIRED)
 find_package(sub_mission_interfaces REQUIRED)
 
 if(BUILD_TESTING)
@@ -34,7 +36,10 @@ if(BUILD_TESTING)
     ament_lint_auto_find_test_dependencies()
 endif()
 
-
+include_directories(
+    include
+    ${colcon_INCLUDE_DIRS}
+)
 
 # add nodes
 add_executable(prelim_node
@@ -43,11 +48,21 @@ add_executable(prelim_node
     src/client.cpp
 )
 
-foreach(node IN ITEMS prelim_node)
+add_executable(mission_node
+    src/mission.cpp
+    src/functions.cpp
+    src/commands.cpp
+    src/client.cpp
+    src/euler.cpp
+    src/util.cpp
+)
+
+foreach(node IN ITEMS prelim_node mission_node)
     target_include_directories(${node}
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:sub_vision/include
     )
 
     ament_target_dependencies(${node}
@@ -55,6 +70,8 @@ foreach(node IN ITEMS prelim_node)
         "rclcpp_lifecycle"
         "lifecycle_msgs"
         "sub_control_interfaces"
+        "sub_vision"
+        "sub_vision_interfaces"
         "sub_mission_interfaces"
     )
 

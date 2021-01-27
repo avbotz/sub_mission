@@ -98,6 +98,7 @@ namespace control_client
 
         auto result = write_depth_client->async_send_request(request);
     }
+    
     void init_clients(std::shared_ptr<rclcpp::Node> new_node)
     {
         // TODO: Add a vision subscriber as well

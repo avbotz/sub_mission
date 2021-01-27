@@ -52,6 +52,6 @@ namespace control_client
 	void write_depth(float);
 
 	void init_clients(std::shared_ptr<rclcpp::Node> new_node);
-};
+}
 
 #endif
