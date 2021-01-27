@@ -36,11 +36,6 @@ if(BUILD_TESTING)
     ament_lint_auto_find_test_dependencies()
 endif()
 
-include_directories(
-    include
-    ${colcon_INCLUDE_DIRS}
-)
-
 # add nodes
 add_executable(prelim_node
     src/tasks/prelim.cpp
@@ -62,7 +57,6 @@ foreach(node IN ITEMS prelim_node mission_node)
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
-        $<BUILD_INTERFACE:sub_vision/include
     )
 
     ament_target_dependencies(${node}

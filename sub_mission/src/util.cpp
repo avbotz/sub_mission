@@ -22,9 +22,22 @@ State create_state(float x, float y, float z, float yaw, float pitch, float roll
     return state;
 }
 
+std::string state_to_text(State state)
+{
+    /* Display State's information as a string */
+    std::ostringstream os;
+    os.precision(2);
+    os << std::fixed;
+    os << "(";
+    os << state.x << " " << state.y << " " << state.z << " "
+        << state.yaw << " " << state.pitch << " " << state.roll;
+    os << ")";
+    return os.str();
+}
+
 void sleep(float seconds)
 {
     /* Sleep for specified amount of seconds */
-    int milliseconds = (int) seconds * 1000.;
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+    int nanoseconds = (int) seconds * 1000000000.;
+    rclcpp::sleep_for(std::chrono::nanoseconds(nanoseconds));
 }

@@ -21,20 +21,20 @@ int main(int argc, char** argv)
     control_client::init_clients(node);
 
     // Wait a second for sub to come up
-    std::this_thread::sleep_for(2s);
+    sleep(2);
 
     std::cout << "set power to 0.2" << std::endl;
     control_client::write("p 0.2\n");
 
     // Wait a second for sub to come up
-    std::this_thread::sleep_for(3s);
+    sleep(3);
 
     // Wait for kill switch
     std::cout << "wait for kill" << std::endl;
     while (rclcpp::ok() && !control_client::alive())
     {
         std::cout << "Sub is not yet alive, waiting..." << std::endl;
-        std::this_thread::sleep_for(500ms);
+        sleep(0.5);
     }
 
     // Run prelim

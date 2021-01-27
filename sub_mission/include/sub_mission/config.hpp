@@ -7,6 +7,8 @@
 #ifndef MISSION_CONFIG_HPP
 #define MISSION_CONFIG_HPP
 
+const bool SIM = false;
+
 const bool POOL_BC = true;
 const bool GATE_LEFT = false;
 
