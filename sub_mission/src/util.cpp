@@ -1,12 +1,7 @@
-#include <cmath>
-#include <chrono>
-#include "sub_control_interfaces/msg/state.hpp"
-#include "sub_mission/client.hpp"
-
+/*
+ * Various helper functions to simplify mission code 
+ */
 #include "sub_mission/util.hpp"
-
-using namespace std::chrono_literals;
-using namespace sub_control_interfaces::msg;
 
 State create_state(float x, float y, float z, float yaw, float pitch, float roll)
 {
@@ -35,9 +30,15 @@ std::string state_to_text(State state)
     return os.str();
 }
 
-void sleep(float seconds)
+float seconds_since_start(std::chrono::time_point<std::chrono::high_resolution_clock> start_time)
 {
-    /* Sleep for specified amount of seconds */
-    int nanoseconds = (int) seconds * 1000000000.;
-    rclcpp::sleep_for(std::chrono::nanoseconds(nanoseconds));
+    /* 
+     * Input is the output of std::chrono::high_resolution_clock::now()
+     * Use this function to calculate time elapsed since the start time 
+     * from your instance of std::chrono::high_resolution_clock::now()
+     */
+    auto stop_time = std::chrono::high_resolution_clock::now();
+    float nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_time - start_time).count();
+    float seconds = nanoseconds / 1000000000.;
+    return seconds;
 }

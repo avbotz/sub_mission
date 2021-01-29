@@ -8,6 +8,10 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "sub_vision_interfaces/srv/vision.hpp"
+#include "sub_vision_interfaces/msg/task.hpp"
+#include "sub_vision/observation.hpp"
+#include "sub_vision/config.hpp"
 #include "sub_control_interfaces/srv/control_alive.hpp"
 #include "sub_control_interfaces/srv/control_state.hpp"
 #include "sub_control_interfaces/srv/control_depth.hpp"
@@ -20,18 +24,19 @@
 #include <cstdlib>
 #include <memory>
 
-using namespace sub_control_interfaces::msg;
+// Alias namespace here just because it's really long to type
+namespace vision = sub_vision_interfaces::srv;
+namespace control = sub_control_interfaces::srv;
+using sub_control_interfaces::msg::State;
 
-// #include "vision/Vision.h"
-// #include "control/state.hpp"
-// #include "vision/observation.hpp"
+namespace vision_client
+{
+    extern std::shared_ptr<rclcpp::Node> node;
 
-// namespace vision_client
-// {
-// 	extern ros::ServiceClient client;
-//
-// 	Observation vision(Task, int);
-// };
+	extern rclcpp::Client<sub_vision_interfaces::srv::Vision>::SharedPtr client;
+
+	Observation vision(Task, int);
+}
 
 namespace control_client
 {

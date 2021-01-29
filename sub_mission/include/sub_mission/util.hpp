@@ -1,18 +1,22 @@
+/*
+ *  @file util.hpp
+ *  @brief Various helper functions to simplify mission code.
+ */
+
+#ifndef MISSION_UTIL_HPP
+#define MISSION_UTIL_HPP
+
 #include <cmath>
+#include <chrono>
 #include "sub_mission/client.hpp"
+#include "sub_vision/config.hpp"
 #include "sub_control_interfaces/msg/state.hpp"
 
-using namespace sub_control_interfaces::msg;
-
-// Constants to represent each DOF
-const int X = 0;
-const int Y = 1;
-const int Z = 2;
-const int YAW = 3;
-const int PITCH = 4;
-const int ROLL = 5;
-const int N = 6;
+// Simplify so don't have to type entire path each time
+using sub_control_interfaces::msg::State;
 
 State create_state(float, float, float, float, float, float);
 std::string state_to_text(State);
-void sleep(float);
+float seconds_since_start(std::chrono::time_point<std::chrono::high_resolution_clock>);
+
+#endif

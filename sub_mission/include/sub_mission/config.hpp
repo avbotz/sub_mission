@@ -24,6 +24,16 @@ const float DROPPER_Y_OFFSET = -0.075;
 // 2 balls; one is 3 cm in front of midline, other is 3 cm behind midline
 const float BALL_OFFSET[2] = { 0.03, -0.03 };
 
+// Constants to represent each DOF
+const int X = 0;
+const int Y = 1;
+const int Z = 2;
+const int YAW = 3;
+const int PITCH = 4;
+const int ROLL = 5;
+const int N = 6;
+
+// Conversions between degrees and radians
 const float D2R = M_PI/180.;
 const float R2D = 180./M_PI;
 

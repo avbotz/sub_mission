@@ -2,30 +2,43 @@
  * Creates necessary connections to control_node
  * and vision_node and executes the necessary function.
  */
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "sub_control_interfaces/srv/control_alive.hpp"
-#include "sub_control_interfaces/srv/control_depth.hpp"
-#include "sub_control_interfaces/srv/control_state.hpp"
-#include "sub_control_interfaces/srv/control_write.hpp"
-#include "sub_control_interfaces/srv/control_write_depth.hpp"
-#include "sub_control_interfaces/srv/control_write_state.hpp"
-#include "sub_control_interfaces/msg/state.hpp"
-
 #include "sub_mission/client.hpp"
-
-#include <chrono>
-#include <cstdlib>
-#include <memory>
 
 using namespace std::chrono_literals;
 
-// Alias namespace here just because it's really long to type
-namespace control = sub_control_interfaces::srv;
+namespace vision_client 
+{
+    std::shared_ptr<rclcpp::Node> node;
+    rclcpp::Client<sub_vision_interfaces::srv::Vision>::SharedPtr client;
+
+    Observation vision(Task task, int camera)
+    {
+        auto request = std::make_shared<vision::Vision::Request>();
+        request->task = task;
+        request->camera = camera;
+
+        auto result = client->async_send_request(request);
+        rclcpp::spin_until_future_complete(node, result);
+        auto detection = result.get();
+
+        Observation obs(detection->confidence, detection->r, detection->c, 
+            detection->dist, detection->hangle, detection->vangle); 
+        return obs;
+    }
+
+    void init_clients(std::shared_ptr<rclcpp::Node> new_node)
+    {
+        // TODO: Eventually, pub/sub based API/architecture for this?
+        node = new_node;
+
+        vision_client::client =
+            node->create_client<sub_vision_interfaces::srv::Vision>("vision");
+    }
+}
 
 namespace control_client
 {
-	std::shared_ptr<rclcpp::Node> node;
+    std::shared_ptr<rclcpp::Node> node;
 
     rclcpp::Client<control::ControlAlive>::SharedPtr alive_client;
     rclcpp::Client<control::ControlState>::SharedPtr state_client;

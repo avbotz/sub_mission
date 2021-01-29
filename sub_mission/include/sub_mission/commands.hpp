@@ -13,9 +13,8 @@
 #include "sub_control_interfaces/msg/state.hpp"
 #include "sub_vision/observation.hpp"
 
+using namespace std::chrono_literals;
 using namespace sub_control_interfaces::msg;
-
-rclcpp::Logger LOGGER = rclcpp::get_logger("LOGGER");
 
 typedef std::pair<float, float> Coordinate;
 
