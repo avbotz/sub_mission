@@ -9,7 +9,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "sub_vision_interfaces/srv/vision.hpp"
-#include "sub_vision_interfaces/msg/task.hpp"
 #include "sub_vision/observation.hpp"
 #include "sub_vision/config.hpp"
 #include "sub_control_interfaces/srv/control_alive.hpp"
@@ -36,6 +35,8 @@ namespace vision_client
 	extern rclcpp::Client<sub_vision_interfaces::srv::Vision>::SharedPtr client;
 
 	Observation vision(Task, int);
+
+	void init_clients(std::shared_ptr<rclcpp::Node>);
 }
 
 namespace control_client
@@ -56,7 +57,7 @@ namespace control_client
 	void write_state(const State&);
 	void write_depth(float);
 
-	void init_clients(std::shared_ptr<rclcpp::Node> new_node);
+	void init_clients(std::shared_ptr<rclcpp::Node>);
 }
 
 #endif

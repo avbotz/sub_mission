@@ -44,7 +44,7 @@ add_executable(prelim_node
 )
 
 add_executable(mission_node
-    src/mission.cpp
+    src/tasks/mission.cpp
     src/functions.cpp
     src/commands.cpp
     src/client.cpp
