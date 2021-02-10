@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
     // Turn on thrusters
     RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set power");
-    control_client::write("p 0.2\n");
+    control_client::set_power(0.2);
 
     // Run mission functions.
 

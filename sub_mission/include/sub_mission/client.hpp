@@ -17,6 +17,7 @@
 #include "sub_control_interfaces/srv/control_write.hpp"
 #include "sub_control_interfaces/srv/control_write_state.hpp"
 #include "sub_control_interfaces/srv/control_write_depth.hpp"
+#include "sub_control_interfaces/srv/control_set_power.hpp"
 #include "sub_control_interfaces/msg/state.hpp"
 
 #include <chrono>
@@ -49,6 +50,7 @@ namespace control_client
 	extern rclcpp::Client<sub_control_interfaces::srv::ControlWrite>::SharedPtr write_client;
 	extern rclcpp::Client<sub_control_interfaces::srv::ControlWriteState>::SharedPtr write_state_client;
 	extern rclcpp::Client<sub_control_interfaces::srv::ControlWriteDepth>::SharedPtr write_depth_client;
+	extern rclcpp::Client<sub_control_interfaces::srv::ControlSetPower>::SharedPtr set_power_client;
 
 	bool alive();
 	State state();
@@ -56,6 +58,7 @@ namespace control_client
 	void write(std::string);
 	void write_state(const State&);
 	void write_depth(float);
+	void set_power(float);
 
 	void init_clients(std::shared_ptr<rclcpp::Node>);
 }

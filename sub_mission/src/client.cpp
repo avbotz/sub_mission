@@ -46,6 +46,7 @@ namespace control_client
     rclcpp::Client<control::ControlDepth>::SharedPtr depth_client;
     rclcpp::Client<control::ControlWriteState>::SharedPtr write_state_client;
     rclcpp::Client<control::ControlWriteDepth>::SharedPtr write_depth_client;
+    rclcpp::Client<control::ControlSetPower>::SharedPtr set_power_client;
 
     bool alive()
     {
@@ -110,6 +111,14 @@ namespace control_client
         request->dist = dist;
 
         auto result = write_depth_client->async_send_request(request);
+    }
+
+    void set_power(float power)
+    {
+        auto request = std::make_shared<control::ControlSetPower::Request>();
+        request->power = power;
+
+        auto result = set_power_client->async_send_request(request);
     }
     
     void init_clients(std::shared_ptr<rclcpp::Node> new_node)
