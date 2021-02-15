@@ -18,7 +18,6 @@ int main(int argc, char** argv)
     // Init control and vision clients
     RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Init control and vision clients");
     control_client::init_clients(node);
-    std::cout << "Init vision clients" << std::endl;
     vision_client::init_clients(node);
 
     // Wait for kill switch
@@ -46,10 +45,11 @@ int main(int argc, char** argv)
     // gate_extra();
     // gate_debug();
     // gate_extra_vision();
-    // vision_test();
     // bins();
     // target();
     // octagon(); 
+    // vision_test();
+    // pid_tuning_sequence();
 
     return 0;
 }

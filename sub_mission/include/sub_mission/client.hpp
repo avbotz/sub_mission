@@ -48,17 +48,17 @@ namespace control_client
 	extern rclcpp::Client<sub_control_interfaces::srv::ControlState>::SharedPtr state_client;
 	extern rclcpp::Client<sub_control_interfaces::srv::ControlDepth>::SharedPtr depth_client;
 	extern rclcpp::Client<sub_control_interfaces::srv::ControlWrite>::SharedPtr write_client;
+	extern rclcpp::Client<sub_control_interfaces::srv::ControlSetPower>::SharedPtr set_power_client;
 	extern rclcpp::Client<sub_control_interfaces::srv::ControlWriteState>::SharedPtr write_state_client;
 	extern rclcpp::Client<sub_control_interfaces::srv::ControlWriteDepth>::SharedPtr write_depth_client;
-	extern rclcpp::Client<sub_control_interfaces::srv::ControlSetPower>::SharedPtr set_power_client;
 
 	bool alive();
 	State state();
 	float depth();
+	void set_power(float);
 	void write(std::string);
 	void write_state(const State&);
 	void write_depth(float);
-	void set_power(float);
 
 	void init_clients(std::shared_ptr<rclcpp::Node>);
 }

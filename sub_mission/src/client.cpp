@@ -3,6 +3,7 @@
  * and vision_node and executes the necessary function.
  */
 #include "sub_mission/client.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 using namespace std::chrono_literals;
 
@@ -33,6 +34,8 @@ namespace vision_client
 
         vision_client::client =
             node->create_client<sub_vision_interfaces::srv::Vision>("vision");
+
+        vision_client::client->wait_for_service();
     }
 }
 
@@ -44,9 +47,9 @@ namespace control_client
     rclcpp::Client<control::ControlState>::SharedPtr state_client;
     rclcpp::Client<control::ControlWrite>::SharedPtr write_client;
     rclcpp::Client<control::ControlDepth>::SharedPtr depth_client;
+    rclcpp::Client<control::ControlSetPower>::SharedPtr set_power_client;
     rclcpp::Client<control::ControlWriteState>::SharedPtr write_state_client;
     rclcpp::Client<control::ControlWriteDepth>::SharedPtr write_depth_client;
-    rclcpp::Client<control::ControlSetPower>::SharedPtr set_power_client;
 
     bool alive()
     {
@@ -85,6 +88,14 @@ namespace control_client
         return result.get()->depth;
     }
 
+    void set_power(float power)
+    {
+        auto request = std::make_shared<control::ControlSetPower::Request>();
+        request->power = power;
+
+        auto result = set_power_client->async_send_request(request);
+    }
+
     void write(std::string input)
     {
         auto request = std::make_shared<control::ControlWrite::Request>();
@@ -112,14 +123,6 @@ namespace control_client
 
         auto result = write_depth_client->async_send_request(request);
     }
-
-    void set_power(float power)
-    {
-        auto request = std::make_shared<control::ControlSetPower::Request>();
-        request->power = power;
-
-        auto result = set_power_client->async_send_request(request);
-    }
     
     void init_clients(std::shared_ptr<rclcpp::Node> new_node)
     {
@@ -133,12 +136,22 @@ namespace control_client
             node->create_client<sub_control_interfaces::srv::ControlState>("control_state");
         control_client::depth_client =
             node->create_client<sub_control_interfaces::srv::ControlDepth>("control_depth");
+        control_client::set_power_client = 
+            node->create_client<sub_control_interfaces::srv::ControlSetPower>("control_set_power");
         control_client::write_client =
             node->create_client<sub_control_interfaces::srv::ControlWrite>("control_write");
         control_client::write_state_client =
             node->create_client<sub_control_interfaces::srv::ControlWriteState>("control_write_state");
         control_client::write_depth_client =
             node->create_client<sub_control_interfaces::srv::ControlWriteDepth>("control_write_depth");
+
+        alive_client->wait_for_service();
+        state_client->wait_for_service();
+        depth_client->wait_for_service();
+        set_power_client->wait_for_service();
+        write_client->wait_for_service();
+        write_state_client->wait_for_service();
+        write_depth_client->wait_for_service();
     }
 }
 
