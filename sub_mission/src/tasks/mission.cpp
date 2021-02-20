@@ -8,28 +8,36 @@
 using namespace std::chrono_literals;
 using namespace sub_control_interfaces::msg;
 
+
+bool SIM;
+
 int main(int argc, char** argv)
 {
     // Init node
-    RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Init node");
+    std::cout << "Init node" << std::endl;
     rclcpp::init(argc, argv);
     auto node = rclcpp::Node::make_shared("mission_node");
 
+    // Check if user has turned sim on, default is false
+    node->declare_parameter("SIM", false);
+    node->get_parameter("SIM", SIM);
+    std::cout << "Is simulation on: " << std::boolalpha << SIM << std::endl;
+
     // Init control and vision clients
-    RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Init control and vision clients");
+    std::cout << "Init control and vision clients" << std::endl;
     control_client::init_clients(node);
     vision_client::init_clients(node);
 
     // Wait for kill switch
-    RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Wait for kill");
+    std::cout << "Wait for kill" << std::endl;
     while (rclcpp::ok() && !control_client::alive())
     {
-        RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Sub is not alive yet, waiting...");
+        std::cout << "Sub is not alive yet, waiting..." << std::endl;
         std::this_thread::sleep_for(0.5s);
     }
 
     // Turn on thrusters
-    RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set power");
+    std::cout << "Set power" << std::endl;
     control_client::set_power(0.2);
 
     // Run mission functions.

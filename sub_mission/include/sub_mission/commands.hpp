@@ -50,6 +50,6 @@ bool isValidCoordinate(Coordinate);
 bool isValidOffsetCoordinate(Coordinate);
 void warmupInference(int, Task, int);
 void disableAltitudeControl();
-void move(const State &); 
+void move(const State); 
 
 #endif

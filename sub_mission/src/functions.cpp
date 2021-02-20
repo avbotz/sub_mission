@@ -15,13 +15,14 @@
 #include "sub_mission/util.hpp"
 #include "sub_vision/observation.hpp"
 
+using namespace std::chrono_literals;
 
 void vision_test()
 {
 	control_client::write_depth(2.);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "DIVED");
+	std::cout << "DIVED" << std::endl;
 	downAlign(3, Task::BINS_ML, DOWN);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "DONE");
+	std::cout << "DONE" << std::endl;
 }
 
 void pid_tuning_sequence()
@@ -36,20 +37,20 @@ void pid_tuning_sequence()
 	while (rclcpp::ok())
 	{
 		// Basically moves in a square
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Testing X");
+		std::cout << "Testing X" << std::endl;
 		move(create_state(2., 0., 0., 0., 0., 0.));
 		std::this_thread::sleep_for(8s);
 
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Testing Y");
+		std::cout << "Testing Y" << std::endl;
 		move(create_state(2., 2., 0., 0., 0., 0.));
 		std::this_thread::sleep_for(8s);
 
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Testing Z");
+		std::cout << "Testing Z" << std::endl;
 		disableAltitudeControl();
 		move(create_state(2., 2., 1., 0., 0., 0.));
 		std::this_thread::sleep_for(8s);
 
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Testing YAW");
+		std::cout << "Testing YAW" << std::endl;
 		move(create_state(2., 2., 1., 180., 0., 0.));
 		move(create_state(2., 2., 1., 90., 0., 0.));
 		move(create_state(2., 2., 1., 0., 0., 0.));
@@ -58,11 +59,11 @@ void pid_tuning_sequence()
 		move(create_state(2., 2., 1., 0., 0., 0.));
 		std::this_thread::sleep_for(8s);
 
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Testing ALTITUDE");
+		std::cout << "Testing ALTITUDE" << std::endl;
 		control_client::write_depth(1.);
 		std::this_thread::sleep_for(12s);
 
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Returning to start");
+		std::cout << "Returning to start" << std::endl;
 		move(create_state(0., 0., 0., 0., 0., 0.));
 		std::this_thread::sleep_for(8s);
 	}
@@ -70,133 +71,133 @@ void pid_tuning_sequence()
 
 void gate()
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Beginning GATE function.");
+	std::cout << "Beginning GATE function." << std::endl;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial state.");
+	std::cout << "Set initial state." << std::endl;
 	// State initial(3.28, 2.95, 1.37, 28.12, 5.12, 3.12);
 	State initial = control_client::state();
 	initial.z = 1.25;
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(initial).c_str());
+	std::cout << "State @ " << state_to_text(initial) << std::endl;
 	move(initial);
 	std::this_thread::sleep_for(3s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Turn towards gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Turn towards gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	float dist = distAndAlign(5, Task::GATE_ML, FRONT);
 
 	/* Different from porpoise */
 	if (dist == 0)
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed to locate gate");
+		std::cout << "Failed to locate gate" << std::endl;
 		setForward(4.0);
 	}
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Turn towards gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Turn towards gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	dist = distAndAlign(5, Task::GATE_ML, FRONT);
 	/* Different from porpoise */
 	
-	// RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Angle @ %f.", angle);
+	// std::cout << "Angle @ " << angle << std::endl;
 	// if (angle > -180. && angle < 180.) setAngle(angle);
 	std::this_thread::sleep_for(1s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Go through gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Go through gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	setForward(dist);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Final State @ %s", state_to_text(control_client::state()).c_str());
+	std::cout << "Final State @ " << state_to_text(control_client::state()) << std::endl;
 }
 
 void gate_extra()
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Beginning GATE_EXTRA function.");
+	std::cout << "Beginning GATE_EXTRA function." << std::endl;
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial depth.");
+	std::cout << "Set initial depth." << std::endl;
 	control_client::write_depth(2.8);
 	std::this_thread::sleep_for(6s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Go towards gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Go towards gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	setCoordinate(std::make_pair(6.5, 0));
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Final State @ %s", state_to_text(control_client::state()).c_str());
+	std::cout << "Final State @ " << state_to_text(control_client::state()) << std::endl;
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set 40/60 depth.");
+	std::cout << "Set 40/60 depth." << std::endl;
 	control_client::write_depth(3.4);
 	std::this_thread::sleep_for(6s);
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Go through gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Go through gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	setCoordinate(std::make_pair(13., 0));
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Final State @ %s", state_to_text(control_client::state()).c_str());
+	std::cout << "Final State @ " << state_to_text(control_client::state()) << std::endl;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Spin in gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Spin in gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	for (int i = 0; i < 8; i++)
 	{
 		State temp = control_client::state();
 		temp.yaw = angleAdd(temp.yaw, 90.);
 		move(temp);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Spin %d @ %s", i+1, state_to_text(control_client::state()).c_str());
+		std::cout << "Spin " << i+1 << " @ " << state_to_text(control_client::state()) << std::endl;
 	}
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "New state @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "New State @ " << state_to_text(control_client::state()) << std::endl;
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Return to original angle.");
+	std::cout << "Return to original angle." << std::endl;
 	if (POOL_BC)
 		setAngle(6.);
 	if (!POOL_BC) 
 		setAngle(-6.);
 	std::this_thread::sleep_for(4s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Continue forward through gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Continue forward through gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	setForward(3.);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Final State @ %s", state_to_text(control_client::state()).c_str());
+	std::cout << "Final State @ " << state_to_text(control_client::state()) << std::endl;
 }
 
 void gate_extra_vision()
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Beginning GATE_EXTRA_VISION function.");
+	std::cout << "Beginning GATE_EXTRA_VISION function." << std::endl;
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial depth.");
+	std::cout << "Set initial depth." << std::endl;
 	control_client::write_depth(2.7);
 	std::this_thread::sleep_for(6s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Align and pass through gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Align and pass through gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	State desired = forwardAlign(15., Task::GATE_ML, FRONT, 120.);
-	move(desired);
-	std::this_thread::sleep_for(8s);
+	control_client::write_state(desired);
+	std::this_thread::sleep_for(10s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Final State @ %s", state_to_text(control_client::state()).c_str());
+	std::cout << "Final State @ " << state_to_text(control_client::state()) << std::endl;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Spin 2 meters after gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
-	// for (int i = 0; i < 8; i++)
-	// {
-	// 	State temp = control_client::state();
-	// 	temp.yaw = angleAdd(temp.yaw, 90.);
-	// 	move(temp);
-	// 	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Spin %d @ %s", i+1, state_to_text(control_client::state()).c_str());
-	// }
-	continuousSpin(8);
+	std::cout << "Spin 2 meters after gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
+	for (int i = 0; i < 8; i++)
+	{
+		State temp = control_client::state();
+		temp.yaw = angleAdd(temp.yaw, 90.);
+		move(temp);
+		std::cout << "Spin " << i+1 << " @ " << state_to_text(control_client::state()) << std::endl;
+	}
+	// continuousSpin(8);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "New state @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "New State @ " << state_to_text(control_client::state()) << std::endl;
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Return to original angle.");
+	std::cout << "Return to original angle." << std::endl;
 	if (POOL_BC)
 		setAngle(6.);
 	if (!POOL_BC) 
 		setAngle (-6.);
 	std::this_thread::sleep_for(4s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Continue forward through gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Continue forward through gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	setForward(1.5);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Final State @ %s", state_to_text(control_client::state()).c_str());
+	std::cout << "Final State @ " << state_to_text(control_client::state()) << std::endl;
 }
 
 void bins()
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Beginning BINS function.");
+	std::cout << "Beginning BINS function." << std::endl;
 	control_client::write_depth(2.);
 
 	/*
@@ -204,7 +205,7 @@ void bins()
 	 */
 
 	// Increased angle because sub crashed into the wall in sim
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Go towards bins, avoid target.");
+	std::cout << "Go towards bins, avoid target." << std::endl;
 	if (POOL_BC) 
 		setAngle(16.);
 	if (!POOL_BC) 
@@ -213,10 +214,10 @@ void bins()
 	setForwardAtDepth(12.5, 1.);
 	std::this_thread::sleep_for(3s);
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial depth.");
+	std::cout << "Set initial depth." << std::endl;
 	control_client::write_depth(3.5);
 
-//	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Look for bins in pool.");
+//	std::cout << "Look for bins in pool." << std::endl;
 	std::vector<Coordinate> search_offsets;
 	// Use for pool B/C.
 	/*
@@ -248,32 +249,32 @@ void bins()
 		if (i != 0)
 			addCoordinate(search_offsets[i]);
 		std::this_thread::sleep_for(3s);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
-		bool isCentered = downContinuousAlign(10, Task::BINS_ML, DOWN, 0.2);
+		std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
+		bool isCentered = downContinuousAlign(10, Task::BINS_ML, DOWN, 0.3);
 		if (isCentered)
 		{
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Found initial bins set at index");
+			std::cout << "Found initial bins set at index" << std::endl;
 			break;
 		}
 	}
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set second depth.");
+	std::cout << "Set second depth." << std::endl;
 	control_client::write_depth(1.5);
 	std::this_thread::sleep_for(8s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Find second offsets for bins.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Find second offsets for bins." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	downContinuousAlign(10, Task::BINS_ML, DOWN, 0.1);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set third depth.");
+	std::cout << "Set third depth." << std::endl;
 	control_client::write_depth(0.75);
 	std::this_thread::sleep_for(6s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Find third offsets for bins.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Find third offsets for bins." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	downContinuousAlign(10, Task::BINS_ML, DOWN, 0.1);
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Drop the balls.");
+	std::cout << "Drop the balls." << std::endl;
 	for (int i = 0; i < 2; i++)
 	{
 		control_client::write("g 0 1\n");
@@ -286,8 +287,8 @@ void bins()
 	}
 
 	/*
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Reset depth.");
-	// control_client::write("z -1\n");
+	std::cout << "Reset depth." << std::endl;
+	// control_client::write("z -1\n" << std::endl;
 	control_client::write_depth(-1.);
 	std::this_thread::sleep_for(6s);
 	*/
@@ -295,26 +296,26 @@ void bins()
 
 void target()
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Beginning TARGET function.");
+	std::cout << "Beginning TARGET function." << std::endl;
 
 	State return_state = control_client::state();
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial state.");
+	std::cout << "Set initial state." << std::endl;
 	State initial = control_client::state();
 	initial.yaw = 180.;
 	if (POOL_BC) 
 		initial.yaw = angleAdd(initial.yaw, 10.);
 	if (!POOL_BC)
 		initial.yaw = angleAdd(initial.yaw, -10.);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(initial).c_str());
+	std::cout << "State @ " << state_to_text(initial) << std::endl;
 	move(initial);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial depth.");
+	std::cout << "Set initial depth." << std::endl;
 	control_client::write_depth(1.65);
 	std::this_thread::sleep_for(4s);
 
 	/*
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Going towards the target.");
+	std::cout << "Going towards the target." << std::endl;
 	setForward(3.);
 	std::this_thread::sleep_for(1s);
 	*/
@@ -328,7 +329,7 @@ void target()
 	std::this_thread::sleep_for(2s);
 	
 	// Added wider angles because in some cases sub couldn't find target in sim
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Setup search angles.");
+	std::cout << "Setup search angles." << std::endl;
 	std::vector<float> search_angles;
 	search_angles.push_back(0.);
 	search_angles.push_back(30.);
@@ -337,8 +338,8 @@ void target()
 	search_angles.push_back(30.);
 	search_angles.push_back(30.);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "First turn towards target.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "First turn towards target." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	State original = control_client::state();
 
 	// Sweep check for target until target in view
@@ -352,8 +353,8 @@ void target()
 			float angle = align(4, Task::TARGET_ML, FRONT);
 			if (isValidAngle(angle))
 			{
-				RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Target found.");
-				RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Align with target.");
+				std::cout << "Target found." << std::endl;
+				std::cout << "Align with target." << std::endl;
 				setAngle(angle);
 				inSight = true;
 				break;
@@ -367,30 +368,30 @@ void target()
 		forwardAlign(12., Task::TARGET_ML, FRONT, 80.);
 		std::this_thread::sleep_for(10s);
 
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Backup from target.");
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+		std::cout << "Backup from target." << std::endl;
+		std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 		float backup_dist = -6.;
 		setForward(backup_dist);
 	}
 	else 
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Could not find target.");
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Returning to original state");
+		std::cout << "Could not find target." << std::endl;
+		std::cout << "Returning to original state" << std::endl;
 		move(original);
 	}
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Return to angle.");
+	std::cout << "Return to angle." << std::endl;
 	State angle_state = control_client::state();
 	angle_state.yaw = 180.;
 	if (POOL_BC) 
 		angle_state.yaw = angleAdd(angle_state.yaw, 5.);
 	if (!POOL_BC)
 		angle_state.yaw = angleAdd(angle_state.yaw, -5.);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(angle_state).c_str());
+	std::cout << "State @ " << state_to_text(angle_state) << std::endl;
 	move(angle_state);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "First turn towards second target.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "First turn towards second target." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 
 	// Sweep check for target until target in view
 	float hdist;
@@ -409,8 +410,8 @@ void target()
 			float angle = align(4, Task::SECOND_TARGET_ML, FRONT);
 			if (isValidAngle(angle))
 			{
-				RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Second target found.");
-				RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Align with second target.");
+				std::cout << "Second target found." << std::endl;
+				std::cout << "Align with second target." << std::endl;
 				setAngle(angle);
 				inSight = true;
 				break;
@@ -424,19 +425,19 @@ void target()
 		forwardAlign(12., Task::SECOND_TARGET_ML, FRONT, 80.);
 		std::this_thread::sleep_for(10s);
 
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Backup from second target.");
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+		std::cout << "Backup from second target." << std::endl;
+		std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 		float backup_dist = -6.;
 		setForward(backup_dist);
 	}
 	else 
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Could not find second target.");
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Returning to original state");
+		std::cout << "Could not find second target." << std::endl;
+		std::cout << "Returning to original state" << std::endl;
 		move(original);
 	}
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Turn back towards octagon.");
+	std::cout << "Turn back towards octagon." << std::endl;
 	if (POOL_BC) 
 		setAngle(8.);
 	if (!POOL_BC) 
@@ -449,20 +450,20 @@ void target()
 
 void octagon()
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Beginning OCTAGON function.");
+	std::cout << "Beginning OCTAGON function." << std::endl;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial state.");
+	std::cout << "Set initial state." << std::endl;
 	// State initial(3.28, 2.95, 1.37, 28.12, 5.12, 3.12);
 	State initial = control_client::state();
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(initial).c_str());
+	std::cout << "State @ " << state_to_text(initial) << std::endl;
 	move(initial);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Going towards octagon.");
+	std::cout << "Going towards octagon." << std::endl;
 	if (!SIM)
 	{
 		setForward(5.);
 
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Surfacing.");
+		std::cout << "Surfacing." << std::endl;
 		control_client::write("p 0\n");
 	}
 	else
@@ -470,89 +471,91 @@ void octagon()
 		// Hard code octagon location for sim, don't use this for actual hydrophone testing
 		State octagon = create_state(34, 11, 0, 0, 0, 0);
 		move(octagon);
-		
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Surfacing.");
+
+		std::cout << "Surfacing." << std::endl;
+		disableAltitudeControl();
+		move(octagon);
 		control_client::write("p 0\n");
 	}
 }
 
 void gate_debug()
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Beginning GATE_DEBUG function.");
+	std::cout << "Beginning GATE_DEBUG function." << std::endl;
 
 	/*
 	 * Each pressure of 1.23 is 1m below the surface.
 	 */
 	/*
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial state.");
+	std::cout << "Set initial state." << std::endl;
 	// State initial = control_client::state();
 	State initial(0., 0., 0., 0., 0., 0.);
 	initial.z = 0.75;
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(initial).c_str());
+	std::cout << "State @ " << state_to_text(initial) << std::endl;
 	move(initial);
 	std::this_thread::sleep_for(4s);
 	*/
 	
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial depth.");
+	std::cout << "Set initial depth." << std::endl;
 	control_client::write_depth(2.);
 	std::this_thread::sleep_for(6s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Set initial forward distance.");
+	std::cout << "Set initial forward distance." << std::endl;
 	setForwardAtDepth(1.5, 0.75);
 	std::this_thread::sleep_for(2s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Turn towards gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Turn towards gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	float angle = align(3, Task::GATE_ML, FRONT);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Angle @ %f.", angle);
+	std::cout << "Angle @ " << angle << std::endl;
 	if (isValidAngle(angle)) 
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Found good angle for 40 percent adjustment.");
+		std::cout << "Found good angle for 40 percent adjustment." << std::endl;
 		if (GATE_LEFT)
 		{
 			angle = angleAdd(angle, -0.);
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Choosing left side of gate for 40.");
+			std::cout << "Choosing left side of gate for 40." << std::endl;
 		}
 		else
 		{
 			angle = angleAdd(angle, 0.);
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Choosing right side of gate for 40.");
+			std::cout << "Choosing right side of gate for 40." << std::endl;
 		}
 		setAngle(angle);
 	}
 	else 
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "No angle found for 40 percent adjustment and continue.");
+		std::cout << "No angle found for 40 percent adjustment and continue." << std::endl;
 	}
 	std::this_thread::sleep_for(4s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Go through gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Go through gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	setForwardAtDepth(1.5, 0.75);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Final State @ %s", state_to_text(control_client::state()).c_str());
+	std::cout << "Final State @ " << state_to_text(control_client::state()) << std::endl;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Spin in gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Spin in gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	for (int i = 0; i < 8; i++)
 	{
 		State temp = control_client::state();
 		temp.yaw = angleAdd(temp.yaw, 90.);
 		temp.z = 0.75;
 		move(temp);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Spin %d @ %s", i+1, state_to_text(control_client::state()).c_str());
+		std::cout << "Spin " << i+1 << " @ " << state_to_text(control_client::state()) << std::endl;
 	}
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "New state @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "New State @ " << state_to_text(control_client::state()) << std::endl;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Return to original angle.");
+	std::cout << "Return to original angle." << std::endl;
 	if (POOL_BC)
 		setAngle(0.);
 	else 
 		setAngle(-0.);
 	std::this_thread::sleep_for(4s);
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Continue forward through gate.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "State @ %s.", state_to_text(control_client::state()).c_str());
+	std::cout << "Continue forward through gate." << std::endl;
+	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
 	setForwardAtDepth(1.5, 0.75);
 	std::this_thread::sleep_for(4s);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Final State @ %s", state_to_text(control_client::state()).c_str());
+	std::cout << "Final State @ " << state_to_text(control_client::state()) << std::endl;
 }

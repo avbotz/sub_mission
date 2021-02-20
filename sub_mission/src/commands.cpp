@@ -19,6 +19,7 @@
 #include "sub_mission/config.hpp"
 #include "sub_mission/util.hpp"
 
+using namespace std::chrono_literals;
 
 float angleDifference(float a1, float a2)
 {
@@ -67,7 +68,7 @@ float align(int attempts, Task task, int camera)
 	for (int i = 0; i < original; i++)
 	{
 		Observation obs = vision_client::vision(task, camera);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Observation @ %s", obs.text().c_str());
+		std::cout << "Observation @ " << obs.text() << std::endl;
 		
 		// Probabilities should be checked before.
 		if (obs.prob > 0.30) 
@@ -79,7 +80,7 @@ float align(int attempts, Task task, int camera)
 
 	if (attempts == 0)
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed to pass threshold for alignment.");
+		std::cout << "Failed to pass threshold for alignment." << std::endl;
 		return -999.;
 	}
 	// Don't add current yaw inside of loop because when sub is turned
@@ -101,7 +102,7 @@ float relativeAlign(int attempts, Task task, int camera)
 	{
 		State current_state = control_client::state();
 		Observation obs = vision_client::vision(task, camera);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Observation @ %s", obs.text().c_str());
+		std::cout << "Observation @ " << obs.text() << std::endl;
 		
 		// Probabilities should be checked before.
 		if (obs.prob > 0.30)
@@ -117,7 +118,7 @@ float relativeAlign(int attempts, Task task, int camera)
 
 	if (attempts == 0)
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed to pass threshold for alignment.");
+		std::cout << "Failed to pass threshold for alignment." << std::endl;
 		return -999.;
 	}
 	average /= attempts;
@@ -133,7 +134,7 @@ float distance(int attempts, Task task, int camera)
 	{
 		State current_state = control_client::state();
 		Observation obs = vision_client::vision(task, camera);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Observation @ %s", obs.text().c_str());
+		std::cout << "Observation @ " << obs.text() << std::endl;
 		
 		if (obs.prob > 0.30)
 		{
@@ -148,7 +149,7 @@ float distance(int attempts, Task task, int camera)
 
 	if (attempts <= 1)
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed to pass threshold for alignment.");
+		std::cout << "Failed to pass threshold for alignment." << std::endl;
 		return -999.;
 	}
 	average /= attempts;
@@ -162,12 +163,12 @@ float distAndAlign(int attempts, Task task, int camera)
 	 * can significantly disrupt distance calculation.
 	 * Recommended to use distance() instead.
 	 */
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Calculating distance.");
+	std::cout << "Calculating distance." << std::endl;
 	State original = control_client::state();
 	float ang1 = relativeAlign(attempts, task, camera);
 	if (!isValidAngle(ang1))
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Could not find object to align to.");
+		std::cout << "Could not find object to align to." << std::endl;
 		return 0;
 	}
 	float hdist = 0.5;
@@ -182,8 +183,8 @@ float distAndAlign(int attempts, Task task, int camera)
 	float ang2 = relativeAlign(attempts, task, camera);
 	if (!isValidAngle(ang2))
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Could not find object to align to.");
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Returning to original state.");
+		std::cout << "Could not find object to align to." << std::endl;
+		std::cout << "Returning to original state." << std::endl;
 		move(original);
 		return 0;
 	}
@@ -213,7 +214,7 @@ float distAndAlign(int attempts, Task task, int camera)
 	setHorizontal(halign);
 	//Find the distance forward to reach the object
 	float dist = sin(tri_2) * l;
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Distance to object of %f", dist);
+	std::cout << "Distance to object of " << dist << std::endl;
 	return dist;
 }
 
@@ -236,7 +237,7 @@ State forwardAlign(float max_dist, Task task, int camera, float timeout)
 	float initial_x = initial.x;
 	float initial_y = initial.y;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Starting forward align");
+	std::cout << "Starting forward align" << std::endl;
 	while (rclcpp::ok())
 	{
 		State state = control_client::state();
@@ -247,13 +248,13 @@ State forwardAlign(float max_dist, Task task, int camera, float timeout)
 			std::pow(state.y - initial_y, 2)
 		);
 		float elapsed_seconds = seconds_since_start(start_time);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "%f seconds since forward align call.", elapsed_seconds);
+		std::cout << elapsed_seconds << " seconds since forward align call" << std::endl;
 		if (travelled > max_dist || elapsed_seconds > timeout)
 			break;
 
 		// Detect object
 		Observation obs = vision_client::vision(task, camera);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Observation @ %s", obs.text().c_str());
+		std::cout << "Observation @ " << obs.text() << std::endl;
 
 		// Break if object is within 3 meters, aim to move 2 meters through object
 		if (isValidDistance(obs.dist) && obs.dist < 3.)
@@ -284,7 +285,7 @@ State forwardAlign(float max_dist, Task task, int camera, float timeout)
 		state.x += output[X];
 		state.y += output[Y];
 		control_client::write_state(state);
-		std::this_thread::sleep_for(0.75s);
+		std::this_thread::sleep_for(0.2s);
 	}
 	// Return current state if it failed
 	return control_client::state();
@@ -292,21 +293,21 @@ State forwardAlign(float max_dist, Task task, int camera, float timeout)
 
 Coordinate downAlign(int attempts, Task task, int camera)
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Starting function");
+	std::cout << "Starting function" << std::endl;
 	int threshold = attempts/2;
 	int original = attempts;
 	float x_avg = 0.;
 	float y_avg = 0.;
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Entering for loop, iterating %d times", original);
+	std::cout << "Entering for loop, iterating " << original << " times" << std::endl;
 	for (int i = 0; i < original; i++)
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Getting State");
+		std::cout << "Getting State" << std::endl;
 		State state = control_client::state();
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Received state at %f %f %f %f %f %f",state.x,state.y,state.z,state.yaw, state.pitch, state.roll);
+		std::cout << "Received state @ " << state_to_text(state) << std::endl; 
 		float dist = control_client::depth();
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Starting observation code");
+		std::cout << "Starting observation code" << std::endl;
 		Observation obs = vision_client::vision(task, camera);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Observation @ %s", obs.text().c_str());
+		std::cout << "Observation @ " << obs.text() << std::endl;
 		if (obs.prob > 0.5)
 		{
 			// Get body offsets.
@@ -327,16 +328,16 @@ Coordinate downAlign(int attempts, Task task, int camera)
 			// Add to average.
 			x_avg += state.x + output[0];
 			y_avg += state.y + output[1];
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug offset @ %f %f", input[0], input[1]);
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug state @ %s", state_to_text(state).c_str());
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug angles @ %f %f %f", angles[0], angles[1], 
-					angles[2]);
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Valid observation offset @ %f %f depth @ %f\n", output[0], 
-					output[1], dist);
+			std::cout << "Debug offset @ " << input[0] << " " << input[1] << std::endl;
+			std::cout << "Debug state @ " << state_to_text(state) << std::endl;
+			std::cout << "Debug angles @ " << angles[0] << " " << angles[1] << " " <<
+					angles[2] << std::endl;
+			std::cout << "Valid observation offset @ " << output[0] << " " << output[1] <<
+					" depth @ " << dist << std::endl;
 		}
 		else 
 		{
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed detection means attempts is decreased.");
+			std::cout << "Failed detection means attempts is decreased." << std::endl;
 			attempts -= 1;
 		}
 		std::this_thread::sleep_for(0.75s);
@@ -344,7 +345,7 @@ Coordinate downAlign(int attempts, Task task, int camera)
 
 	if (attempts == 0)
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed to pass threshold for down alignment.");
+		std::cout << "Failed to pass threshold for down alignment." << std::endl;
 		return std::make_pair(-999., -999.);
 	}
 	x_avg /= (float)attempts;
@@ -360,7 +361,7 @@ bool frontContinuousAlign(float min_seconds, Task task, int camera, float thres)
 	 * First move vertically then horizontally
 	 */
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Enter front continuous alignment call");
+	std::cout << "Enter front continuous alignment call" << std::endl;
 	bool isValigned = frontContinuousValign(min_seconds, task, camera, thres);
 	bool isHaligned = frontContinuousHalign(min_seconds, task, camera, thres);
 	return (isValigned && isHaligned);
@@ -376,22 +377,23 @@ bool frontContinuousValign(float min_seconds, Task task, int camera, float thres
 	float max_seconds = 30.;
 	int attempts = 5;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Starting vertical continuous alignment.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Minimum of %f seconds, maximum of %f seconds", min_seconds, max_seconds);
+	std::cout << "Starting vertical continuous alignment." << std::endl;
+	std::cout << "Minimum of " << min_seconds << " seconds, maximum of " << 
+		max_seconds << " seconds" << std::endl;
 	warmupInference(1, task, camera);
 	auto start_time = std::chrono::high_resolution_clock::now();
 
 	while (rclcpp::ok())
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Getting State");
+		std::cout << "Getting State" << std::endl;
 		State state = control_client::state();
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Received state at %f %f %f %f %f %f",state.x,state.y,state.z,state.yaw, state.pitch, state.roll);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Starting observation code");
+		std::cout << "Received state @ " << state_to_text(state) << std::endl; 
+		std::cout << "Starting observation code" << std::endl;
 		Observation obs = vision_client::vision(task, camera);
 		float dist = obs.dist;
 		if (!isValidDistance(dist)) 
 			dist = 4;
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Observation @ %s", obs.text().c_str());
+		std::cout << "Observation @ " << obs.text() << std::endl;
 		if (obs.prob > 0.5)
 		{
 			// If object is already centered, then terminate the loop.
@@ -400,12 +402,12 @@ bool frontContinuousValign(float min_seconds, Task task, int camera, float thres
 				if (isValigned(obs.r, camera, thres))
 				{
 					// Stay in aligned position in case the state overshoots
-					RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Object is vertically aligned.");
+					std::cout << "Object is vertically aligned." << std::endl;
 					float currentDepth = control_client::depth();
 					control_client::write_depth(currentDepth);
 					return true;
 				}
-				else RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Object is not vertically aligned.");
+				else std::cout << "Object is not vertically aligned." << std::endl;
 			}
 			// Get vertical offset.
 			float z = std::tan(obs.vangle*M_PI/180.)*(dist);
@@ -414,23 +416,23 @@ bool frontContinuousValign(float min_seconds, Task task, int camera, float thres
 			float depth = control_client::depth() - z;
 			control_client::write_depth(depth);
 
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug state @ %s", state_to_text(state).c_str());
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Valid observation offset @ %f distance @ %f\n", z, dist);
+			std::cout << "Debug state @ " << state_to_text(state) << std::endl;
+			std::cout << "Valid observation offset @ " << z << " distance @ " << dist << std::endl;
 		}
 		else 
 		{
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed detection means attempts is decreased.");
+			std::cout << "Failed detection means attempts is decreased." << std::endl;
 			attempts -= 1;
 		}
 		if (attempts == 0)
 		{
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed to pass threshold for vertical alignment.");
+			std::cout << "Failed to pass threshold for vertical alignment." << std::endl;
 			return false;
 		}
 
 		// Check if time is up
 		float elapsed_seconds = seconds_since_start(start_time);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "%f seconds since vertical align call.", elapsed_seconds);
+		std::cout << elapsed_seconds << " seconds since vertical align call." << std::endl;
 
 		// If minimum seconds > maximum seconds, it will prioritize the minimum first, going over the max
 		if (elapsed_seconds >= min_seconds && elapsed_seconds >= max_seconds) break;
@@ -452,22 +454,23 @@ bool frontContinuousHalign(float min_seconds, Task task, int camera, float thres
 	float max_seconds = 30.;
 	int attempts = 5;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Starting horizontal continuous alignment.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Minimum of %f seconds, maximum of %f seconds", min_seconds, max_seconds);
+	std::cout << "Starting horizontal continuous alignment." << std::endl;
+	std::cout << "Minimum of " << min_seconds << " seconds, maximum of " << 
+		max_seconds << " seconds" << std::endl;
 	warmupInference(1, task, camera);
 	auto start_time = std::chrono::high_resolution_clock::now();
 
 	while (rclcpp::ok())
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Getting State");
+		std::cout << "Getting State" << std::endl;
 		State state = control_client::state();
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Received state at %f %f %f %f %f %f",state.x,state.y,state.z,state.yaw, state.pitch, state.roll);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Starting observation code");
+		std::cout << "Received state @ " << state_to_text(state) << std::endl; 
+		std::cout << "Starting observation code" << std::endl;
 		Observation obs = vision_client::vision(task, camera);
 		float dist = obs.dist;
 		if (!isValidDistance(dist)) 
 			dist = 4;
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Observation @ %s", obs.text().c_str());
+		std::cout << "Observation @ " << obs.text() << std::endl;
 		if (obs.prob > 0.5)
 		{
 			// If object is already centered, then terminate the loop.
@@ -476,11 +479,11 @@ bool frontContinuousHalign(float min_seconds, Task task, int camera, float thres
 				if (isHaligned(obs.c, camera, thres))
 				{
 					// Stay in aligned position in case the original state overshoots
-					RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Object is horizontally aligned.");
+					std::cout << "Object is horizontally aligned." << std::endl;
 					control_client::write_state(state);
 					return true;
 				}
-				else RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Object is not horizontally aligned.");
+				else std::cout << "Object is not horizontally aligned." << std::endl;
 			}
 			// Get body offsets.
 			float y = std::tan(obs.hangle*M_PI/180.)*(dist);
@@ -496,27 +499,27 @@ bool frontContinuousHalign(float min_seconds, Task task, int camera, float thres
 			state.y += output[1];
 			control_client::write_state(state);
 
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug offset @ %f", input[1]);
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug state @ %s", state_to_text(state).c_str());
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug angles @ %f %f %f", angles[0], angles[1], 
-					angles[2]);
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Valid observation offset @ %f %f distance @ %f\n", output[0], 
-					output[1], dist);
+			std::cout << "Debug offset @ " << input[1] << std::endl;
+			std::cout << "Debug state @ " << state_to_text(state) << std::endl;
+			std::cout << "Debug angles @ " << angles[0] << " " << angles[1] << " " <<
+					angles[2] << std::endl;
+			std::cout << "Valid observation offset @ " << output[0] << " " << output[1] <<
+				" distance @ " << dist << std::endl;
 		}
 		else 
 		{
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed detection means attempts is decreased.");
+			std::cout << "Failed detection means attempts is decreased." << std::endl;
 			attempts -= 1;
 		}
 		if (attempts == 0)
 		{
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed to pass threshold for horizontal alignment.");
+			std::cout << "Failed to pass threshold for horizontal alignment." << std::endl;
 			return false;
 		}
 
 		// Check if time is up
 		float elapsed_seconds = seconds_since_start(start_time);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "%f seconds since horizontal align call.", elapsed_seconds);
+		std::cout << elapsed_seconds << " seconds since horizontal align call." << std::endl;
 
 		// If minimum seconds > maximum seconds, it will prioritize the minimum first, going over the max
 		if (elapsed_seconds >= min_seconds && elapsed_seconds >= max_seconds) break;
@@ -550,20 +553,21 @@ bool downContinuousAlign(float min_seconds, Task task, int camera, float thres)
 	float max_seconds = 30.;
 	int attempts = 5;
 
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Starting down continuous alignment.");
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Entering loop for a minimum of %f seconds, maximum of %f seconds", min_seconds, max_seconds);
+	std::cout << "Starting down continuous alignment." << std::endl;
+	std::cout << "Entering loop for a minimum of " << min_seconds << " seconds, maximum of " 
+		<< max_seconds << " seconds" << std::endl;
 	warmupInference(1, task, camera);
 	auto start_time = std::chrono::high_resolution_clock::now();
 
 	while (rclcpp::ok())
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Getting State");
+		std::cout << "Getting State" << std::endl;
 		State state = control_client::state();
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Received state at %f %f %f %f %f %f",state.x,state.y,state.z,state.yaw, state.pitch, state.roll);
+		std::cout << "Received state @ " << state_to_text(state) << std::endl; 
 		float dist = control_client::depth();
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Starting observation code");
+		std::cout << "Starting observation code" << std::endl;
 		Observation obs = vision_client::vision(task, camera);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Observation @ %s", obs.text().c_str());
+		std::cout << "Observation @ " << obs.text() << std::endl;
 		if (obs.prob > 0.5)
 		{
 			// If object is already centered, then terminate the loop.
@@ -593,31 +597,31 @@ bool downContinuousAlign(float min_seconds, Task task, int camera, float thres)
 			state.y += output[1];
 			control_client::write_state(state);
 
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug offset @ %f %f", input[0], input[1]);
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug state @ %s", state_to_text(state).c_str());
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Debug angles @ %f %f %f", angles[0], angles[1], 
-					angles[2]);
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Valid observation offset @ %f %f depth @ %f\n", output[0], 
-					output[1], dist);
+			std::cout << "Debug offset " << input[0] << " " << input[1] << std::endl;
+			std::cout << "Debug state @ " << state_to_text(state) << std::endl;
+			std::cout << "Debug angles @ " << angles[0] << " " << angles[1] << " " << 
+					angles[2] << std::endl;
+			std::cout << "Valid observation offset @ " << output[0] << " " << output[1] <<
+					" depth @ " << dist << std::endl;
 		}
 		else 
 		{
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed detection means attempts is decreased.");
+			std::cout << "Failed detection means attempts is decreased." << std::endl;
 			attempts -= 1;
 		}
 		if (attempts == 0)
 		{
-			RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed to pass threshold for down alignment.");
+			std::cout << "Failed to pass threshold for down alignment." << std::endl;
 			return false;
 		}
 
 		// Check if time is up
 		float elapsed_seconds = seconds_since_start(start_time);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "%f seconds since down align call.", elapsed_seconds);
+		std::cout << elapsed_seconds << " seconds since down align call." << std::endl;
 
 		// If minimum seconds > maximum seconds, it will prioritize the minimum first, going over the max
 		if (elapsed_seconds >= min_seconds && elapsed_seconds >= max_seconds) break;
-		std::this_thread::sleep_for(0.75s);
+		std::this_thread::sleep_for(0.2s);
 	}
 
 	return false;
@@ -625,14 +629,14 @@ bool downContinuousAlign(float min_seconds, Task task, int camera, float thres)
 
 bool testObjIsCentered(int attempts, Task task, int camera, float thres)
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Testing if object is centered.");
+	std::cout << "Testing if object is centered." << std::endl;
 	int original = attempts;
 	float avg_r = 0.;
 	float avg_c = 0.;
 	for (int i = 0; i < original; i++)
 	{
 		Observation obs = vision_client::vision(task, camera);
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Observation @ %s", obs.text().c_str());
+		std::cout << "Observation @ " << obs.text() << std::endl;
 		
 		if (obs.prob > 0.30)
 		{
@@ -648,7 +652,7 @@ bool testObjIsCentered(int attempts, Task task, int camera, float thres)
 
 	if (attempts == 0)
 	{
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Failed to pass threshold for alignment.");
+		std::cout << "Failed to pass threshold for alignment." << std::endl;
 		return false;
 	}
 
@@ -667,8 +671,8 @@ bool objIsCentered(float r, float c, int camera, float thres)
 
 	bool isCentered = (isValigned(r, camera, thres) && isHaligned(c, camera, thres));
 
-	if (isCentered) RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Object is centered.");
-	else RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Object is not centered.");
+	if (isCentered) std::cout << "Object is centered." << std::endl;
+	else std::cout << "Object is not centered." << std::endl;
 
 	return isCentered;
 }
@@ -732,7 +736,7 @@ void setForward(float dist)
 	bodyToInertial(input, angles, output);
 	now.x += output[0];
 	now.y += output[1];
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Setting forward state @ %s", state_to_text(now).c_str());
+	std::cout << "Setting forward state @ " << state_to_text(now) << std::endl;
 	move(now);
 }
 
@@ -745,7 +749,7 @@ void setHorizontal(float dist)
 	bodyToInertial(input, angles, output);
 	now.x += output[0];
 	now.y += output[1];
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Setting horizontal state @ %s", state_to_text(now).c_str());
+	std::cout << "Setting horizontal state @ " << state_to_text(now) << std::endl;
 	move(now);
 }
 
@@ -761,7 +765,7 @@ void setForwardAtDepth(float dist, float depth)
 	now.x += output[0];
 	now.y += output[1];
 	now.z = depth;
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Setting forward with depth state @ %s", state_to_text(now).c_str());
+	std::cout << "Setting forward with depth state @ " << state_to_text(now) << std::endl;
 	move(now);
 }
 
@@ -777,14 +781,14 @@ void setHorizontalAtDepth(float dist, float depth)
 	now.x += output[0];
 	now.y += output[1];
 	now.z = depth;
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Setting horizontal with depth state @ %s", state_to_text(now).c_str());
+	std::cout << "Setting horizontal with depth state @ " << state_to_text(now) << std::endl;
 	move(now);
 }
 void setAngle(float angle)
 {
 	State now = control_client::state();
 	now.yaw = angle;
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Setting angle state @ %s.", state_to_text(now).c_str());
+	std::cout << "Setting angle state @ " << state_to_text(now) << std::endl;
 	move(now);
 }
 
@@ -792,7 +796,7 @@ void addAngle(float angle)
 {
 	State now = control_client::state();
 	now.yaw = angleAdd(now.yaw, angle);
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Setting add angle state @ %s.", state_to_text(now).c_str());
+	std::cout << "Setting add angle state @ " << state_to_text(now) << std::endl;
 	move(now);
 }
 
@@ -817,7 +821,7 @@ void continuousSpin(int num_90_turns)
 		desired.x = original_x;
 		desired.y = original_y;
 		desired.yaw = desired_angle;
-		RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Spin %d to %s", i + 1, state_to_text(desired).c_str());
+		std::cout << "Spin " << i << " to " << state_to_text(desired) << std::endl;
 		control_client::write_state(desired);
 
 		bool completedTurn = false;
@@ -843,7 +847,7 @@ void setCoordinate(Coordinate coordinate)
 	State now = control_client::state();
 	now.x = coordinate.first;
 	now.y = coordinate.second;
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Setting coordinate state @ %s.", state_to_text(now).c_str());
+	std::cout << "Setting coordinate state @ " << state_to_text(now) << std::endl;
 	move(now);
 }
 
@@ -856,7 +860,7 @@ void addCoordinate(Coordinate coordinate)
 	bodyToInertial(input, angles, output);
 	now.x += output[0];
 	now.y += output[1];
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Setting add coordinate state @ %s.", state_to_text(now).c_str());
+	std::cout << "Setting add corrdinate state @ " << state_to_text(now) << std::endl;
 	move(now);
 }
 
@@ -872,7 +876,7 @@ bool isValidOffsetCoordinate(Coordinate coordinate)
 
 void warmupInference(int attempts, Task task, int camera)
 {
-	RCLCPP_INFO(rclcpp::get_logger("sub_mission"), "Warming up ML model.");
+	std::cout << "Warming up ML model." << std::endl;
 	for (int i = 0; i < attempts; i++)
 		Observation obs = vision_client::vision(task, camera);
 }
@@ -884,7 +888,7 @@ void disableAltitudeControl()
 	std::this_thread::sleep_for(1s);
 }
 
-void move(const State &dest)
+void move(const State dest)
 {
 	control_client::write_state(dest);
 	bool quit = false;
