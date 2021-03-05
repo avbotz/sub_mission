@@ -431,7 +431,7 @@ bool frontContinuousValign(float min_seconds, Task task, int camera, float thres
 		}
 
 		// Check if time is up
-		float elapsed_seconds = seconds_since_start(start_time);
+		elapsed_seconds = seconds_since_start(start_time);
 		std::cout << elapsed_seconds << " seconds since vertical align call." << std::endl;
 
 		// If minimum seconds > maximum seconds, it will prioritize the minimum first, going over the max
@@ -518,7 +518,7 @@ bool frontContinuousHalign(float min_seconds, Task task, int camera, float thres
 		}
 
 		// Check if time is up
-		float elapsed_seconds = seconds_since_start(start_time);
+		elapsed_seconds = seconds_since_start(start_time);
 		std::cout << elapsed_seconds << " seconds since horizontal align call." << std::endl;
 
 		// If minimum seconds > maximum seconds, it will prioritize the minimum first, going over the max
@@ -616,7 +616,7 @@ bool downContinuousAlign(float min_seconds, Task task, int camera, float thres)
 		}
 
 		// Check if time is up
-		float elapsed_seconds = seconds_since_start(start_time);
+		elapsed_seconds = seconds_since_start(start_time);
 		std::cout << elapsed_seconds << " seconds since down align call." << std::endl;
 
 		// If minimum seconds > maximum seconds, it will prioritize the minimum first, going over the max

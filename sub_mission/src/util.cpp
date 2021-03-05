@@ -24,8 +24,8 @@ std::string state_to_text(State state)
     os.precision(2);
     os << std::fixed;
     os << "(";
-    os << state.x << " " << state.y << " " << state.z << " "
-        << state.yaw << " " << state.pitch << " " << state.roll;
+    os << state.x << ", " << state.y << ", " << state.z << ", "
+        << state.yaw << ", " << state.pitch << ", " << state.roll;
     os << ")";
     return os.str();
 }

@@ -171,15 +171,17 @@ void gate_extra_vision()
 
 	std::cout << "Spin 2 meters after gate." << std::endl;
 	std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
-	for (int i = 0; i < 8; i++)
-	{
-		State temp = control_client::state();
-		temp.yaw = angleAdd(temp.yaw, 90.);
-		move(temp);
-		std::cout << "Spin " << i+1 << " @ " << state_to_text(control_client::state()) << std::endl;
-	}
-	// continuousSpin(8);
+	State original_state = control_client::state();
 
+	// Complete 360 degree turn (Don't do a full 720 or sub will spin out of position)
+	continuousSpin(4);
+
+	// Hold original position
+	move(original_state);
+	std::this_thread::sleep_for(4s);
+
+	// Complete next 360 degree turn for total of 720 degrees
+	continuousSpin(4);
 	std::cout << "New State @ " << state_to_text(control_client::state()) << std::endl;
 	
 	std::cout << "Return to original angle." << std::endl;
@@ -250,7 +252,7 @@ void bins()
 			addCoordinate(search_offsets[i]);
 		std::this_thread::sleep_for(3s);
 		std::cout << "State @ " << state_to_text(control_client::state()) << std::endl;
-		bool isCentered = downContinuousAlign(10, Task::BINS_ML, DOWN, 0.3);
+		bool isCentered = downContinuousAlign(10, Task::BINS_ML, DOWN, 0.5);
 		if (isCentered)
 		{
 			std::cout << "Found initial bins set at index" << std::endl;
@@ -475,6 +477,7 @@ void octagon()
 		std::cout << "Surfacing." << std::endl;
 		disableAltitudeControl();
 		move(octagon);
+		std::this_thread::sleep_for(7.5s);
 		control_client::write("p 0\n");
 	}
 }
